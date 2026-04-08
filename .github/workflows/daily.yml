@@ -2,24 +2,30 @@ name: Daily Reels Monitor
 
 on:
   schedule:
-    - cron: "30 2 * * *"
-    - cron: "30 12 * * *"
+    - cron: '30 2 * * *'
+    - cron: '30 12 * * *'
   workflow_dispatch:
 
 jobs:
-  run:
+  monitor:
     runs-on: ubuntu-latest
     timeout-minutes: 240
+
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
-      - run: pip install -r requirements.txt
-      - run: python -u main.py
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run monitor
         env:
-          META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
-          META_IG_USER_ID: ${{ secrets.META_IG_USER_ID }}
+          IG_USERNAME: ${{ secrets.IG_USERNAME }}
+          IG_PASSWORD: ${{ secrets.IG_PASSWORD }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-
+        run: python -u main.py
