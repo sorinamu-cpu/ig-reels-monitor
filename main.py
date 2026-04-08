@@ -70,34 +70,31 @@ def main():
         usernames = [line.strip() for line in f if line.strip()]
 
     print(f"Total targets: {len(usernames)}")
-    all_hits = []
+    total_hits = 0
+
     for i, u in enumerate(usernames, 1):
         print(f"[{i}/{len(usernames)}] {u}")
         data = fetch_business_discovery(u)
         hits = filter_hot_reels(data)
-        all_hits.extend(hits)
+
+        for h in hits:
+            total_hits += 1
+            msg = (
+                f"🔥 떡상 릴스 발견!\n"
+                f"@{h['username']}\n"
+                f"💬 댓글 {h['comments']} ❤️ 좋아요 {h['likes']}\n"
+                f"📅 {h['timestamp'][:10]}\n"
+                f"{h['permalink']}"
+            )
+            send_telegram(msg)
+            print(f"  → 알림 전송: {h['permalink']}")
+
         time.sleep(SLEEP_SEC)
 
-    if not all_hits:
+    if total_hits == 0:
         send_telegram(f"📊 오늘 조건({COMMENT_THRESHOLD}+ 댓글, 최근 {DAYS_WINDOW}일) 충족 릴스 없음")
-        return
-
-    all_hits.sort(key=lambda x: x["comments"], reverse=True)
-
-    header = f"🔥 떡상 릴스 {len(all_hits)}건 (댓글 {COMMENT_THRESHOLD}+, 최근 {DAYS_WINDOW}일)\n\n"
-    lines = []
-    for h in all_hits:
-        lines.append(
-            f"@{h['username']} | 💬{h['comments']} ❤️{h['likes']}\n{h['permalink']}\n"
-        )
-    msg = header
-    for line in lines:
-        if len(msg) + len(line) > 3800:
-            send_telegram(msg)
-            msg = ""
-        msg += line + "\n"
-    if msg:
-        send_telegram(msg)
+    else:
+        send_telegram(f"✅ 모니터링 완료! 총 {total_hits}건 발견")
 
 if __name__ == "__main__":
     main()
