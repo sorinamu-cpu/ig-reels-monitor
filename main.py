@@ -2,6 +2,9 @@ import instaloader
 import os
 import time
 import requests
+import base64
+import tempfile
+import pathlib
 from datetime import datetime, timezone, timedelta
 
 COMMENT_THRESHOLD = 300
@@ -33,12 +36,12 @@ def main():
         download_comments=False,
         save_metadata=False
     )
-import base64, tempfile, pathlib
-session_data = base64.b64decode(IG_SESSION)
-session_path = pathlib.Path(tempfile.gettempdir()) / f"session-{IG_USERNAME}"
-session_path.write_bytes(session_data)
-L.load_session_from_file(IG_USERNAME, str(session_path))
-print("세션 로드 완료")
+
+    session_data = base64.b64decode(IG_SESSION)
+    session_path = pathlib.Path(tempfile.gettempdir()) / f"session-{IG_USERNAME}"
+    session_path.write_bytes(session_data)
+    L.load_session_from_file(IG_USERNAME, str(session_path))
+    print("세션 로드 완료")
 
     cutoff = datetime.now(timezone.utc) - timedelta(days=DAYS_WINDOW)
 
