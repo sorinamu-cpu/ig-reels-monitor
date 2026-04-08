@@ -9,7 +9,7 @@ DAYS_WINDOW = 3
 SLEEP_SEC = 20
 
 IG_USERNAME = os.environ["IG_USERNAME"]
-IG_PASSWORD = os.environ["IG_PASSWORD"]
+IG_SESSION = os.environ["IG_SESSION"]
 TELEGRAM_BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
 TELEGRAM_CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
 
@@ -33,8 +33,12 @@ def main():
         download_comments=False,
         save_metadata=False
     )
-    L.login(IG_USERNAME, IG_PASSWORD)
-    print("로그인 완료")
+import base64, tempfile, pathlib
+session_data = base64.b64decode(IG_SESSION)
+session_path = pathlib.Path(tempfile.gettempdir()) / f"session-{IG_USERNAME}"
+session_path.write_bytes(session_data)
+L.load_session_from_file(IG_USERNAME, str(session_path))
+print("세션 로드 완료")
 
     cutoff = datetime.now(timezone.utc) - timedelta(days=DAYS_WINDOW)
 
